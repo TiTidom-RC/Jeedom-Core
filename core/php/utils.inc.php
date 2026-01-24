@@ -1572,7 +1572,7 @@ function decodeSessionData($_data) {
 		$num = $pos - $offset;
 		$varname = substr($_data, $offset, $num);
 		$offset += $num + 1;
-		$data = unserialize(substr($_data, $offset));
+		$data = @unserialize(substr($_data, $offset));
 		$return_data[$varname] = $data;
 		$offset += strlen(serialize($data));
 	}
