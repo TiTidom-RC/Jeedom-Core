@@ -202,11 +202,7 @@ class repo_market {
 	public static function deleteObjet($_update) {
 		try {
 			$market = repo_market::byLogicalIdAndType($_update->getLogicalId(), $_update->getType());
-		} catch (Exception $e) {
-			$market = new repo_market();
-			$market->setLogicalId($_update->getLogicalId());
-			$market->setType($_update->getType());
-		} catch (Error $e) {
+		} catch (\Throwable $e) {
 			$market = new repo_market();
 			$market->setLogicalId($_update->getLogicalId());
 			$market->setType($_update->getType());
@@ -215,8 +211,7 @@ class repo_market {
 			if (is_object($market)) {
 				$market->remove();
 			}
-		} catch (Exception $e) {
-		} catch (Error $e) {
+		} catch (\Throwable $e) {
 		}
 	}
 
@@ -272,7 +267,7 @@ class repo_market {
 		if (config::byKey('market::cloud::backup::password') != config::byKey('market::cloud::backup::password_confirmation')) {
 			throw new Exception(__('Le mot de passe du backup cloud n\'est pas identique à la confirmation', __FILE__));
 		}
-		self::backup_clean($_path);
+		//self::backup_clean($_path);
 		self::backup_createFolderIsNotExist();
 		try {
 			if (!file_exists('/tmp/jeedom_gnupg')) {
@@ -376,10 +371,9 @@ class repo_market {
 				'timestamp' => strtotime($file->propstat->prop->getlastmodified)
 			);
 		}
-		function cmp($a, $b) { // $a,$b are reference to first index of array
-			return strcmp($a["timestamp"], $b["timestamp"]);
-		}
-		usort($files, "cmp");
+		usort($files, function ($a, $b) {
+			return $a['timestamp'] <=> $b['timestamp'];
+		});
 		$result = array();
 		foreach ($files as $file) {
 			$result[] = $file['name'];
@@ -521,10 +515,7 @@ class repo_market {
 					} else {
 						$return['status'] = 'ok';
 					}
-				} catch (Exception $e) {
-					log::add('market', 'debug', __('Erreur repo_market::getinfo :', __FILE__) . ' ' . $e->getMessage());
-					$return['status'] = 'ok';
-				} catch (Error $e) {
+				} catch (\Throwable $e) {
 					log::add('market', 'debug', __('Erreur repo_market::getinfo :', __FILE__) . ' ' . $e->getMessage());
 					$return['status'] = 'ok';
 				}
@@ -572,10 +563,7 @@ class repo_market {
 					$return['status'] = 'ok';
 				}
 			}
-		} catch (Exception $e) {
-			log::add('market', 'debug', __('Erreur repo_market::getinfo :', __FILE__) . ' ' . $e->getMessage());
-			$return['status'] = 'ok';
-		} catch (Error $e) {
+		} catch (\Throwable $e) {
 			log::add('market', 'debug', __('Erreur repo_market::getinfo :', __FILE__) . ' ' . $e->getMessage());
 			$return['status'] = 'ok';
 		}

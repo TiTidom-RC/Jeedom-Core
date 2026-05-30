@@ -1017,8 +1017,7 @@ class cmd {
 						$calc = str_replace('#value#', $_value, $calc);
 					}
 					$_value = jeedom::evaluateExpression($calc);
-				} catch (Exception $ex) {
-				} catch (Error $ex) {
+				} catch (\Throwable $ex) {
 				}
 			}
 			switch ($this->getSubType()) {
@@ -2213,9 +2212,7 @@ class cmd {
 		$http->setLogError(false);
 		try {
 			$http->exec();
-		} catch (Exception $e) {
-			log::add('cmd', 'error', __('Erreur push sur :', __FILE__) . ' ' . $url . ' commande : ' . $this->getHumanName() . ' => ' . log::exception($e));
-		} catch (Error $e) {
+		} catch (\Throwable $e) {
 			log::add('cmd', 'error', __('Erreur push sur :', __FILE__) . ' ' . $url . ' commande : ' . $this->getHumanName() . ' => ' . log::exception($e));
 		}
 	}
@@ -2330,7 +2327,7 @@ class cmd {
 		return;
 	}
 
-	public function dropInfluxDatabase() {
+	public static function dropInfluxDatabase() {
 		try {
 			$database = cmd::getInflux();
 			if ($database == '') {
@@ -2356,10 +2353,6 @@ class cmd {
 			log::add('cmd', 'error', __('Erreur delete influx sur :', __FILE__) . ' ' . ' commande : ' . $this->getHumanName() . ' => ' . log::exception($e));
 		}
 		return;
-	}
-
-	public function historyInfluxAll() {
-		cmd::historyInflux('all');
 	}
 
 	public static function sendHistoryInflux($_params) {
@@ -2408,20 +2401,23 @@ class cmd {
 		}
 	}
 
-	public function historyInflux($_type = '') {
+	/**
+	 * @param string|int $_type 'all' for all cmd, cmd id for specific cmd
+	 * @return void
+	 */
+	public static function historyInflux($_type = 'all') {
 		$cron = new cron();
 		$cron->setClass('cmd');
 		$cron->setFunction('sendHistoryInflux');
 		if ($_type == 'all') {
 			$cron->setOption(array('cmd_id' => 'all'));
 		} else {
-			$cron->setOption(array('cmd_id' => intval($this->getId())));
+			$cron->setOption(array('cmd_id' => intval($_type)));
 		}
 		$cron->setLastRun(date('Y-m-d H:i:s'));
 		$cron->setOnce(1);
 		$cron->setSchedule(cron::convertDateToCron(strtotime("now") + 60));
 		$cron->save();
-		return;
 	}
 
 	public function generateAskResponseLink($_response, $_plugin = 'core', $_network = 'external') {
