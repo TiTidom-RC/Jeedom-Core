@@ -55,18 +55,6 @@ parameters:
 			path: core/api/jeeApi.php
 
 		-
-			message: '#^Instantiated class InfluxDB\\Client not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/class/cmd.class.php
-
-		-
-			message: '#^Instantiated class InfluxDB\\Point not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/class/cmd.class.php
-
-		-
 			message: '#^Variable \$goupingType might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
